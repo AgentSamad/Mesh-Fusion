@@ -6,7 +6,7 @@ using UnityEngine;
     public class FuseMesh : EditorWindow
     {
         private DefaultAsset _exportDirectory = null;
-        private GameObject _combineTarget = null;
+        private GameObject targetMesh = null;
         private bool _exportMesh;
         
         [MenuItem("Window/FuseMesh")]
@@ -17,12 +17,12 @@ using UnityEngine;
 
         void OnGUI()
         {
-            _combineTarget = (GameObject)EditorGUILayout.ObjectField("CombineTarget", _combineTarget, typeof(GameObject), true);
+            targetMesh = (GameObject)EditorGUILayout.ObjectField("TargetMesh", targetMesh, typeof(GameObject), true);
             _exportMesh = EditorGUILayout.Toggle("Export Mesh", _exportMesh);
-            _exportDirectory = (DefaultAsset) EditorGUILayout.ObjectField("Export Directory", _exportDirectory, typeof(DefaultAsset), true);
+            _exportDirectory = (DefaultAsset) EditorGUILayout.ObjectField("Export Path", _exportDirectory, typeof(DefaultAsset), true);
             if (GUILayout.Button("Combine"))
             {
-                if (_combineTarget == null)
+                if (targetMesh == null)
                 {
                     return;
                 }
@@ -32,7 +32,7 @@ using UnityEngine;
 
         void CombineMesh()
         {
-            var meshFilters = _combineTarget.GetComponentsInChildren<MeshFilter>();
+            var meshFilters = targetMesh.GetComponentsInChildren<MeshFilter>();
             var combineMeshInstanceDictionary = new Dictionary<Material, List<CombineInstance>>();
 
             foreach (var meshFilter in meshFilters)
@@ -65,7 +65,7 @@ using UnityEngine;
                 }
             }
             
-            _combineTarget.SetActive(false);
+            targetMesh.SetActive(false);
 
             foreach (var kvp in combineMeshInstanceDictionary)
             {
@@ -80,7 +80,7 @@ using UnityEngine;
                 Unwrapping.GenerateSecondaryUVSet(mesh);
 
                 meshFilter.sharedMesh = mesh;
-                newObject.transform.parent = _combineTarget.transform.parent;
+                newObject.transform.parent = targetMesh.transform.parent;
 
                 if (!_exportMesh || _exportDirectory == null)
                 {
